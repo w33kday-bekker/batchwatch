@@ -104,12 +104,68 @@ public class Scheduler {
 
     System.out.println("*** ALERT WRITTEN FOR: " + job.getName() + " ***");
     }
-    
+
     private void insertJobRun(int jobId, String status, String startedAt,
                             String endedAt, int attempt, String output) throws Exception {
         Statement stmt = Database.getConnection().createStatement();
         stmt.execute("INSERT INTO job_runs (job_id, status, started_at, ended_at, attempt, output) VALUES (" +
             jobId + ", '" + status + "', '" + startedAt + "', '" + endedAt + "', " + attempt + ", '" + output + "')");
+        stmt.close();
+    }
+
+    public void printReport() throws Exception {
+        System.out.println("\n========== BATCHWATCH STATUS REPORT ==========");
+        System.out.println("Generated: " + LocalDateTime.now().format(FMT));
+        System.out.println("===============================================\n");
+
+        Statement stmt = Database.getConnection().createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT * FROM jobs");
+
+        while (rs.next()) {
+            int jobId = rs.getInt("id");
+            String jobName = rs.getString("name");
+
+            // get last run
+            Statement stmt2 = Database.getConnection().createStatement();
+            ResultSet rs2 = stmt2.executeQuery(
+                "SELECT status, started_at FROM job_runs WHERE job_id = " + jobId +
+                " ORDER BY started_at DESC LIMIT 1");
+
+            String lastStatus = "NEVER RUN";
+            String lastRun = "N/A";
+            if (rs2.next()) {
+                lastStatus = rs2.getString("status");
+                lastRun = rs2.getString("started_at");
+            }
+            rs2.close();
+            stmt2.close();
+
+            // get success rate over last 20 runs
+            Statement stmt3 = Database.getConnection().createStatement();
+            ResultSet rs3 = stmt3.executeQuery(
+                "SELECT COUNT(*) as total, SUM(CASE WHEN status = 'SUCCESS' THEN 1 ELSE 0 END) as successes " +
+                "FROM (SELECT status FROM job_runs WHERE job_id = " + jobId +
+                " ORDER BY started_at DESC LIMIT 20)");
+
+            int total = 0;
+            int successes = 0;
+            if (rs3.next()) {
+                total = rs3.getInt("total");
+                successes = rs3.getInt("successes");
+            }
+            rs3.close();
+            stmt3.close();
+
+            double successRate = total > 0 ? (successes * 100.0 / total) : 0;
+            boolean failing = lastStatus.equals("FAILED");
+
+            System.out.println("Job:          " + jobName);
+            System.out.println("Last Status:  " + lastStatus + (failing ? "  *** FAILING ***" : ""));
+            System.out.println("Last Run:     " + lastRun);
+            System.out.println("Success Rate: " + String.format("%.1f", successRate) + "% over last " + total + " runs");
+            System.out.println("-----------------------------------------------\n");
+        }
+        rs.close();
         stmt.close();
     }
 }

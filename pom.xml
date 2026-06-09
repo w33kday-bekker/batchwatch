@@ -49,6 +49,7 @@
                 <version>3.2.0</version>
                 <configuration>
                     <mainClass>com.lucasb.batchwatch.Main</mainClass>
+                    <commandlineArgs>${exec.args}</commandlineArgs>
                 </configuration>
             </plugin>
         </plugins>
