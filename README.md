@@ -29,20 +29,29 @@ mvn exec:java -Dexec.args="report"
 ---
 
 ## Sample Status Report Output
+```
 ========== BATCHWATCH STATUS REPORT ==========
 Generated: 2026-06-09 14:38:54
+===============================================
+
 Job:          Always OK Job
 Last Status:  SUCCESS
 Last Run:     2026-06-09 13:53:26
 Success Rate: 100.0% over last 19 runs
+-----------------------------------------------
+
 Job:          Flaky Job
 Last Status:  SUCCESS
 Last Run:     2026-06-09 13:53:26
 Success Rate: 68.4% over last 19 runs
+-----------------------------------------------
+
 Job:          Bad Data Job
 Last Status:  FAILED  *** FAILING ***
 Last Run:     2026-06-09 13:53:26
 Success Rate: 0.0% over last 19 runs
+-----------------------------------------------
+```
 
 ---
 
