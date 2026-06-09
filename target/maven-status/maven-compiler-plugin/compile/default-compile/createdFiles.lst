@@ -1,2 +1,6 @@
+com\lucasb\batchwatch\scheduler\Scheduler.class
+com\lucasb\batchwatch\jobs\JobExecutor.class
 com\lucasb\batchwatch\db\Database.class
+com\lucasb\batchwatch\model\Job.class
+com\lucasb\batchwatch\model\JobRun.class
 com\lucasb\batchwatch\Main.class
